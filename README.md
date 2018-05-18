@@ -1,15 +1,17 @@
-# Environment-set-up-Travis-Heroku_Docker
+# Environment-set-up-Travis-Heroku-Docker
 
-This a tutorial that covered set-up environment Travis CI - Heroku - Doker for Ruby on rails project.
-Also, this tutorial will show how to overcome common difficulties that you can face during set-up.
+Check related app repo [here](https://github.com/blarvin/TEAM-MALN-ACEBOOK)
+
+This a tutorial that covers the set-up environment involving Travis CI - Heroku - Docker for a Ruby on Rails project.
+Also, this tutorial will show how to overcome common difficulties that you can be faced with during set-up.
 
 ## Part I. Set up.
 
 ### Travis CI
 
-* Go to [Travis](https://travis-ci.org/) and log in with your GitHub.
+* Go to [Travis](https://travis-ci.org/) and log in with your GitHub credentials.
 * Follow the instructions on Travis about how to set-up a new repository.
-* Make sure, that in the root of your repository you have ```.travis.yml``` file.
+* Make sure that in the root of your repository you have ```.travis.yml``` file.
 
 #### .travis.yml
 
@@ -46,12 +48,12 @@ In your terminal (you should be in your repo):
 * ```$ git push heroku master```
 * ```$ heroku open```
 
-On this stage, you should be able to see your app opened with Heroku. If you facing any difficulties you can every time see your logs and following debugging process: ```$ heroku logs --tail```
+At this stage, you should be able to see your app opened with Heroku. If you are facing any difficulties, you can see your logs and follow a debugging process: ```$ heroku logs --tail```
 
 ### Docker
 
 * Go to [Docker](https://www.docker.com/) and make an account.
-* Make sure that you have inside you repo following files:
+* Make sure that you have the following files inside your repo:
 
 #### docker-compose.yml
 
@@ -73,7 +75,7 @@ services:
       - db
 ```
 
-#### Dokerfile
+#### Dockerfile
 
 ```
 FROM ruby:2.5.0
@@ -102,11 +104,11 @@ default: &default
 development:
   <<: *default
   database: pgapp_development
-  localhost: db    #You need this line to build app with docker, but this lines should be deleted before you push to Github, otherwise, Travis would fail.
+  localhost: db    #You need this line to build app with docker, but this line should be deleted before you push to Github, otherwise, Travis would fail.
 test:
 <<: *default
 database: pgapp_test
-localhost: db     #You need this line to build app with docker, but this lines should be deleted before you push to Github, otherwise, Travis would fail.
+localhost: db     #You need this line to build app with docker, but this line should be deleted before you push to Github, otherwise, Travis would fail.
 
 production:
   <<: *default
@@ -116,7 +118,7 @@ production:
   password: <%= ENV['DATABASE_PASSWORD'] %>
 ```
 
-### Deploy Heroku using Docker
+### Deploy via Heroku using Docker
 
 In your terminal:
 
@@ -143,24 +145,24 @@ $ heroku container:push web -a maln-acebook
 
 #### CMD bundle exec rackup --port=$PORT
 
-Basically, our first mistake is that we did not know that we should specify in Dockerfile which port it should use. At first, we were guessing and tried to change random lines of code in config to make it works. After we realized, that this approach would not work, we forced ourselves to go through proper debugging process:
-* rais visibility --> using logs --> google errors --> discuss with pair partner if it makes sense to change this particular part of the code.
-It helped us to go through process quickly and step by step we found riched a point where we can run our app locally with docker, but it was broken on Heroku. We could not figure out what went wrong and followed our agreement do not be stacked for a long time, and asked mentors for help.
-Together we find out how to modify our config file and add line ```CMD bundle exec rackup --port=$PORT```.
+Basically, our first mistake was that we did not know that we should specify which port should be used in our Dockerfile. At first, we were guessing and tried to change random lines of code in config to make it work. We quickly realized that this approach would not work, we forced ourselves to go through a proper debugging process:
+* raise visibility --> using logs --> google errors --> discuss with pair partner if it makes sense to change this particular part of the code.
+It helped us to go through process quickly and step by step we reached a point where we can run our app locally with docker, but it was broken on Heroku. We could not figure out what went wrong and followed our agreement to not be stuck for too long, so we asked a coach for some assistance.
+Together we found out how to modify our config file and added the following line ```CMD bundle exec rackup --port=$PORT```.
 
-#### Get rid-off pid files
+#### Removing pid files
 
-If you have a mistake like ``` A server is already running. Check /maln-acebook/tmp/pids/server.pid.```. You should run following comands in your terminal:
+If you have a mistake like the following: ``` A server is already running. Check /maln-acebook/tmp/pids/server.pid.```. You should run following comands in your terminal:
 * ```$ sudo rm tmp/pids/server.pid```
 * ```$ docker-compose run web rake db:reset```
 * ```$ docker-compose up --build```
 
 #### Database issues
 
-The relationship between Docker and Heroku require from you:
-* Every time when you introducing a new ```gem``` to your app you have to run ```$ docker-compose run web bundle install```
-* Every time you changing the logic in the database you need to drop heroku database:
-1. ```$ heroku pg:reset DATABASE_URL -a maln-acebook``` and ```--confirm``` this comand
-2. Get rid-off pids
+The relationship between Docker and Heroku require you to do the following:
+* Every time when you are introducing a new ```gem``` to your app you have to run ```$ docker-compose run web bundle install```
+* Every time you change the logic in the database you need to drop heroku database:
+1. ```$ heroku pg:reset DATABASE_URL -a maln-acebook``` and ```--confirm``` this command
+2. Remove pids
 3. ```$ heroku container:login```
 4. ```$ heroku container:push web -a maln-acebook```
