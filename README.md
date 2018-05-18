@@ -7,7 +7,7 @@ Also, this tutorial will show how to overcome common difficulties that you can f
 
 ### Travis CI
 
-* Go to https://travis-ci.org/ and log in with your GitHub.
+* Go to [Travis](https://travis-ci.org/) and log in with your GitHub.
 * Follow the instructions on Travis about how to set-up a new repository.
 * Make sure, that in the root of your repository you have ```.travis.yml``` file.
 
@@ -36,7 +36,7 @@ deploy:
 ```
 ### Heroku
 
-* Go to https://dashboard.heroku.com and make a free account
+* Go to [Heroku](https://dashboard.heroku.com) and make a free account
 * We assume that you have Ruby installed
 
 In your terminal (you should be in your repo):
@@ -50,7 +50,7 @@ On this stage, you should be able to see your app opened with Heroku. If you fac
 
 ### Docker
 
-* Go to https://www.docker.com/ and make an account.
+* Go to [Docker](https://www.docker.com/) and make an account.
 * Make sure that you have inside you repo following files:
 
 #### docker-compose.yml
@@ -121,6 +121,7 @@ production:
 In your terminal:
 
 ```
+$ docker login
 $ docker-compose run web bundle install
 
 $ docker-compose run web rake db:create # create databases
@@ -139,3 +140,27 @@ $ heroku container:push web -a maln-acebook
 ```
 
 ## Part II. Difficulties.
+
+#### CMD bundle exec rackup --port=$PORT
+
+Basically, our first mistake is that we did not know that we should specify in Dockerfile which port it should use. At first, we were guessing and tried to change random lines of code in config to make it works. After we realized, that this approach would not work, we forced ourselves to go through proper debugging process:
+* rais visibility --> using logs --> google errors --> discuss with pair partner if it makes sense to change this particular part of the code.
+It helped us to go through process quickly and step by step we found riched a point where we can run our app locally with docker, but it was broken on Heroku. We could not figure out what went wrong and followed our agreement do not be stacked for a long time, and asked mentors for help.
+Together we find out how to modify our config file and add line ```CMD bundle exec rackup --port=$PORT```.
+
+#### Get rid-off pid files
+
+If you have a mistake like ``` A server is already running. Check /maln-acebook/tmp/pids/server.pid.```. You should run following comands in your terminal:
+* ```$ sudo rm tmp/pids/server.pid```
+* ```$ docker-compose run web rake db:reset```
+* ```$ docker-compose up --build```
+
+#### Database issues
+
+The relationship between Docker and Heroku require from you:
+* Every time when you introducing a new ```gem``` to your app you have to run ```$ docker-compose run web bundle install```
+* Every time you changing the logic in the database you need to drop heroku database:
+1. ```$ heroku pg:reset DATABASE_URL -a maln-acebook``` and ```--confirm``` this comand
+2. Get rid-off pids
+3. ```$ heroku container:login```
+4. ```$ heroku container:push web -a maln-acebook```
