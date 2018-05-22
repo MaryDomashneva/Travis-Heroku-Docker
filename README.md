@@ -1,4 +1,4 @@
-# Environment-set-up-Travis-Heroku-Docker
+# Travis-Heroku-Docker
 
 Check related app repo [here](https://github.com/blarvin/TEAM-MALN-ACEBOOK)
 
